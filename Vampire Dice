@@ -1,0 +1,483 @@
+# This code is the intellectual property of Caitlin L.T Wardle and is designed to be run on Python.
+import pygame
+pygame.init() #pygame features
+import random #randomization
+import time # allow for timing
+# code for music is rep.lit let you play sound
+#mixer.init()
+#mixer.music.load("Buffy Song.html")
+#mixer.music.set_volume(0.5)
+#pygame.mixer.music.play(-1) (can't add mixer on repl.it)
+#///////////////////////////////////////////////////////////
+# Start Global Variables
+Stakepic=pygame.image.load("Stake.jpg")
+Fangpic=pygame.image.load("Fang.jpg")
+Crosspic=pygame.image.load("Cross.png")
+Stakesize = pygame.transform.scale(Stakepic,(150, 150))
+Fangsize=pygame.transform.scale(Fangpic,(150,150))
+Crosssize=pygame.transform.scale(Crosspic,(150,150)) # resize dice images to fit on display well
+points=0 # players points
+pointCom=0 #Computers points
+Turn=0
+Stakes=0
+Bites=0
+Cross=0
+black=(0,0,0)
+red=(205,0,0)
+blue=(0,245,255)
+white=(255,255,255)
+grey=(131,139,139)
+x=800 # width
+y=600 # Height
+again=True # variable for replay well true statements
+screen = pygame.display.set_mode([x, y])
+pygame.display.set_caption('Vampire Dice')
+font = pygame.font.Font('freesansbold.ttf', 32) # set font
+fontsmall = pygame.font.Font('freesansbold.ttf', 30) 
+title=font.render("Vampire Dice",True,black)
+instructions=font.render('Instructions?',True,black)
+instructions1=fontsmall.render('You are fighting for your life',True,black)
+instructions2=fontsmall.render('try to get 20 stakes in as few turns as possible.',True,black)
+instructions3=fontsmall.render("You can roll as many times as you want in one turn,",True,black)
+instructions4=fontsmall.render('but roll three bites in one turn and lose all your stakes!',True,black)
+instructions5=fontsmall.render('You can get rid of one bite for every 3 crosses you roll',True,black)
+instructions6=fontsmall.render('If the computer gets to 20 before you it’s Game Over',True,black)
+text=font.render ("Exit",True,black)
+yes=font.render ("Yes",True,black)
+no=font.render("No",True, black)
+replay=font.render ("Would you Like to Try Again?",True, white)
+# End Global Variables
+#//////////////////////////////////////////////////////////
+#Title and start screen
+while again==True :
+  screen.fill(red)
+  pygame.display.flip()
+  screen.blit(title, (300,300))
+  pygame.display.update()
+  time.sleep(3)
+  screen.fill(red)
+  pygame.display.flip()
+  screen.blit (instructions,(275,100))
+  pygame.display.update()
+  circle=True # circle for replay (endless)
+  while circle==True:
+    mouse = pygame.mouse.get_pos()
+    for ev in pygame.event.get(): # draw the buttons
+     if 460 <= mouse[0] <= 460+140 and y/3 <= mouse[1] <= y/3+40: 
+         pygame.draw.rect(screen,grey,[460,200,140,40])
+         screen.blit(yes, (460+50,200))
+     else: 
+         pygame.draw.rect(screen,white,[460,200,140,40])  
+         screen.blit(yes, (460+50,200)) 
+     pygame.display.update()
+     if 200 <= mouse[0] <= 200+140 and y/3 <= mouse[1] <= y/3+40: 
+         pygame.draw.rect(screen,grey,[200,200,140,40])
+         screen.blit(no, (200+50,200)) 
+     else: 
+         pygame.draw.rect(screen,white,[200,200,140,40])  
+         screen.blit(no, (200+50,200)) 
+     pygame.display.update() 
+    if ev.type == pygame.MOUSEBUTTONDOWN:
+     if 460<= mouse[0] <= 460+140 and y/3 <= mouse[1]<= y/3+40: # if player hits yes
+      a=0
+      b=True
+      while a==0:
+       screen.fill(red)
+       pygame.display.flip()
+       screen.blit (instructions1,(175,0))
+       screen.blit (instructions2,(45,75))
+       screen.blit (instructions3,(25,150))
+       screen.blit (instructions4,(0,225))
+       screen.blit (instructions5,(0,300))
+       screen.blit (instructions6,(5,375))
+       pygame.display.update()
+       while b==True:
+        for ev in pygame.event.get(): 
+         if ev.type == pygame.QUIT: 
+            pygame.quit() 
+         #if player clicks the mouse exit instructions
+         if ev.type == pygame.MOUSEBUTTONDOWN: 
+            if x/2.5 <= mouse[0] <= x/2.5+140 and y/1.25 <= mouse[1] <= y/1.25+40:  # if play hits exit
+              b=False
+              a=1
+              circle=False
+              again=False # exit well statemtnets to start game (again=false well statement begins)
+        mouse = pygame.mouse.get_pos() # find mouse
+        # if the player hovers over button button turns draker
+        if x/2.5 <= mouse[0] <= x/2.5+140 and y/1.25 <= mouse[1] <= y/1.25+40: 
+         pygame.draw.rect(screen,grey,[x/2.5,480,140,40]) 
+        else: 
+         pygame.draw.rect(screen,white,[x/2.5,480,140,40])  
+        screen.blit(text , (x/2.5+35,480)) 
+        pygame.display.update() 
+     if 200<= mouse[0] <= 200+140 and y/3 <= mouse[1]<= y/3+40: # if player doesn't want to see instructions
+          b=False
+          a=1
+          circle=False # exit well statements to start game below
+  again=False
+# End of title and start screen
+###########################################################
+#Defintions for game
+def ComRandom():
+ value=random.randrange(0,6,1)
+ return (value) #Computers turn
+def Dice1 ():
+ symbol=['stake','cross','bite'] 
+ Die=(symbol[random.randrange (0,3,1)])
+ return (Die) #Your 1st die roll result
+def Dice2():
+ symbol=['stake','stake','cross','bite'] #try to blance out likelyhood to minimize triple bites
+ Die=(symbol[random.randrange (0,4,1)])
+ return (Die)#Your 2nd die roll result
+def Dice3():
+ symbol=['stake','cross','bite']
+ Die=(symbol[random.randrange (0,3,1)])
+ return (Die) #Your 3rd die roll result
+def TurnCounter():
+ TC=font.render(("Turn:{}".format(Turn)),True,black)
+ return screen.blit(TC,(5,0)) # show player what turn their on
+def PCounter(): # show player the current points tally
+ C=font.render(("Computer: {} You: {}".format(pointCom,points)),True,black)
+ return screen.blit(C,(460,0))
+def RollCounter(): # show player what they rolled previously
+ R=font.render(("Bites: {} Stakes: {} Crosses: {}".format (Bites,Stakes,Cross)),True,black)
+ return screen.blit (R,(0,50))
+def playagain (): # so player can repeat game without restarting program
+  replay=font.render ("Would you Like to Try Again?",True, white)
+  return screen.blit(replay,(175,150))
+# End of game defintions
+#############################################################
+while again==False:#To repeat game/play again
+ points=0# reset for the replay
+ pointCom=0#reset for the replay
+ Turn=0 #reset for the replay
+ while points<20 and pointCom<20:#Until someone wins
+   screen.fill(red)
+   TurnCounter()
+   PCounter()
+   pygame.display.flip()
+   Cross=0 # reset crosses
+   Bites=0 # reset bites
+   done=False #Variable for well statement
+   ask=font.render("Roll?",True,black)
+   screen.blit(ask,(360,100))
+   pygame.display.update()
+   circle=True
+   while circle==True:
+    mouse = pygame.mouse.get_pos()
+    for ev in pygame.event.get(): # draw the buttons
+     if 460 <= mouse[0] <= 460+140 and y/3 <= mouse[1] <= y/3+40: 
+         pygame.draw.rect(screen,grey,[460,200,140,40])
+         screen.blit(yes, (460+50,200))
+     else: 
+         pygame.draw.rect(screen,white,[460,200,140,40])  
+         screen.blit(yes, (460+50,200)) 
+     pygame.display.update()
+     if 200 <= mouse[0] <= 200+140 and y/3 <= mouse[1] <= y/3+40: 
+         pygame.draw.rect(screen,grey,[200,200,140,40])
+         screen.blit(no, (200+50,200)) 
+     else: 
+         pygame.draw.rect(screen,white,[200,200,140,40])  
+         screen.blit(no, (200+50,200)) 
+     pygame.display.update()
+     if ev.type == pygame.MOUSEBUTTONDOWN: # if player clicks mouse
+      mouse = pygame.mouse.get_pos() # find mouse
+      if 460<= mouse[0] <= 460+140 and y/3 <= mouse[1]<= y/3+40: #If player clicks yea
+       while done==False:# players turn well loop
+        Die1=Dice1()
+        Die2=Dice2()
+        Die3=Dice3()# Rolls maintain value instead of changing to randomized each time
+        screen.fill(red)
+        PCounter()
+        TurnCounter()
+        pygame.display.flip()
+        roll=font.render(("You rolled a {}, a {} and a {}".format(Die1,Die2,Die3)),True,black) #Players roll
+        screen.blit (roll,(100,100))
+        pygame.display.update()
+        if Die1=='stake':
+          Stakes=Stakes+1
+          screen.blit(Stakesize,(50,200)) #left side edge
+          pygame.display.update() # display dice and change counter
+        elif Die1=='cross':
+          Cross=Cross+1
+          screen.blit(Crosssize,(50,200))#left side edge
+          pygame.display.update()
+        else:
+          Bites=Bites+1
+          screen.blit(Fangsize,(50,200))#left side edge
+          pygame.display.update()
+        if Die2=='stake':
+          Stakes=Stakes+1
+          screen.blit(Stakesize,(325,200))#middle
+          pygame.display.update()
+        elif Die2=='cross':
+          Cross=Cross+1
+          screen.blit(Crosssize,(325,200))#middle
+          pygame.display.update()
+        else:
+          Bites=Bites+1
+          screen.blit(Fangsize,(325,200))#middle
+          pygame.display.update()
+        if Die3=='stake':
+          Stakes=Stakes+1
+          screen.blit(Stakesize,(600,200))# right side edge
+          RollCounter()# display your number of bite/crosses/stakes
+          pygame.display.update()
+          time.sleep(3)
+        elif Die3=='cross':
+          Cross=Cross+1
+          screen.blit(Crosssize,(600,200))# right side edge
+          RollCounter()
+          pygame.display.update()
+          time.sleep(3)
+        elif Die3=='bite':
+          Bites=Bites+1
+          screen.blit(Fangsize,(600,200))# right side edge
+          RollCounter()
+          pygame.display.update()
+          time.sleep(3)
+        if Cross>=3 and Bites>=1 and Bites<=3: #3 crosses removes 1 bite
+          screen.fill(red)
+          PCounter()
+          TurnCounter()
+          pygame.display.flip()
+          escape=font.render("You escaped a bite!",True,black)
+          screen.blit (escape,(200,150))
+          pygame.display.update()
+          time.sleep(2)
+          Bites=Bites-1
+          Cross=0
+        if Bites>=3: # 3 bites turn ends
+          screen.fill(red)
+          TurnCounter()
+          PCounter()
+          pygame.display.flip()
+          drain=font.render ("you were drained by a vampire, no points earned",True,black)
+          screen.blit (drain,(10,150))
+          pygame.display.update()
+          time.sleep(4)
+          Stakes=0
+          ComRoll=ComRandom() # cements Computers points (won't ranomize the points again in this function)
+          pointCom=pointCom+ComRoll # Computers turn
+          ComTurn=font.render(("The Computer earned {} points".format(ComRoll)),True,black) # displays computers turn
+          screen.fill(red)
+          PCounter()
+          TurnCounter()
+          pygame.display.flip()
+          screen.blit(ComTurn,(140,250))
+          pygame.display.update()
+          time.sleep(2)
+          Turn=Turn+1
+          circle=False
+          done=True # exit players turn
+          continue# go back to start
+        loop=True
+        while loop==True:
+         screen.fill(red)
+         PCounter()
+         TurnCounter()
+         pygame.display.flip()
+         ask2=font.render(("Roll again?"),True, black)# do you want to continue your turn?
+         screen.blit(ask2,(310,150))
+         RollCounter()
+         pygame.display.update()
+         over=False
+         while over==False:
+          mouse = pygame.mouse.get_pos()
+          for ev in pygame.event.get(): # draw the buttons
+           if 460 <= mouse[0] <= 460+140 and y/3 <= mouse[1] <= y/3+40: 
+             pygame.draw.rect(screen,grey,[460,200,140,40])
+             screen.blit(yes, (460+50,200))
+           else: 
+              pygame.draw.rect(screen,white,[460,200,140,40])
+              screen.blit(yes, (460+50,200)) 
+           pygame.display.update()
+           if 200 <= mouse[0] <= 200+140 and y/3 <= mouse[1] <= y/3+40: 
+             pygame.draw.rect(screen,grey,[200,200,140,40])
+             screen.blit(no, (200+50,200)) 
+           else: 
+             pygame.draw.rect(screen,white,[200,200,140,40])
+             screen.blit(no, (200+50,200)) 
+             pygame.display.update()
+           if ev.type == pygame.MOUSEBUTTONDOWN: # if player clicks mouse
+            if 460<= mouse[0] <= 460+140 and y/3 <= mouse[1]<= y/3+40: # if player hits yes
+             over=True
+             loop=False
+             continue # go back to top of players well loop
+            elif 200<= mouse[0] <= 200+140 and y/3 <= mouse[1]<= y/3+40: # if player hits no
+              points=points+Stakes #convert stakes earned to points
+              Stakes=0 # reset stakes
+              over=True
+              loop=False
+              done=True # exit players turn
+              continue# go back to start
+      elif 200<= mouse[0] <= 200+140 and y/3 <= mouse[1]<= y/3+40: # if player doesn't want to take their turn
+       Stakes=0 # reset stakes
+       Turn=Turn+1
+       ComRoll=ComRandom()
+       ComTurn=font.render(("The Computer earned {} points".format(ComRoll)),True,black)
+       screen.fill(red) # displays computers turn
+       PCounter()# changes points at top of screen
+       TurnCounter()# changes turn at top of screen
+       pygame.display.flip()
+       screen.blit(ComTurn,(140,250))
+       pygame.display.update()
+       time.sleep(2)       
+       pointCom=pointCom+ComRoll # Computers turn
+       circle=False
+       continue # go to start
+ if points>=pointCom: # if you win
+   screen.fill(blue)
+   pygame.display.flip()
+   win=font.render("You defeated the Vampires!!",True,black)
+   number=font.render(("It took you {} turns".format(Turn)),True,black) # how successful you were
+   screen.blit(win,(150,200))
+   screen.blit(number,(150,250))
+   pygame.display.update()
+   time.sleep(2)
+   if Turn<=3: # different titles you can earn
+     loop2=True
+     loop3=True
+     while loop2==True:
+      slayer=font.render ("You’re a Vampire Slayer!!",True,black)
+      screen.blit(slayer,(150,300))
+      pygame.display.update()
+      time.sleep(4)
+      screen.fill(black)
+      pygame.display.flip()
+      playagain () # Displays play agian screen
+      pygame.display.update()
+      # Draws buttons
+      pygame.draw.rect(screen,white,[460,200,140,40])  
+      screen.blit(yes, (460+50,200))
+      pygame.display.update()
+      pygame.draw.rect(screen,white,[200,200,140,40])
+      screen.blit(no, (200+50,200)) 
+      pygame.display.update()
+      while loop3==True:
+       for ev in pygame.event.get():
+        if ev.type == pygame.MOUSEBUTTONDOWN:
+         mouse = pygame.mouse.get_pos() 
+         if 460<= mouse[0] <= 460+140 and y/3 <= mouse[1]<= y/3+40: # yes button
+            loop3=False
+            loop2=False
+            continue # exit well loops and go back to top of main well loop *while again=false*
+         if 200<= mouse[0] <= 200+140 and y/3 <= mouse[1]<= y/3+40: # no button
+            quit() # end game
+   elif Turn<=5:
+     loop2=True
+     loop3=True # ensures that these blocks of code are always run and lets you hit replay multiple times
+     while loop2==True:
+      tough=font.render ("You’re one tough cookie",True,black)
+      screen.blit(tough,(150,300))
+      pygame.display.update()
+      time.sleep(4)
+      screen.fill(black)
+      pygame.display.flip()
+      playagain () # displays play agian screen
+      pygame.display.update()
+      # draws buttons
+      pygame.draw.rect(screen,white,[460,200,140,40])  
+      screen.blit(yes, (460+50,200))
+      pygame.display.update()
+      pygame.draw.rect(screen,white,[200,200,140,40])
+      screen.blit(no, (200+50,200)) 
+      pygame.display.update()
+      while loop3==True:
+       for ev in pygame.event.get():
+        if ev.type == pygame.MOUSEBUTTONDOWN:
+         mouse = pygame.mouse.get_pos()
+         if 460<= mouse[0] <= 460+140 and y/3 <= mouse[1]<= y/3+40: # yes button
+            loop3=False
+            loop2=False
+            continue # exits other well statements and goes back to top (agin=false well loop)
+         if 200<= mouse[0] <= 200+140 and y/3 <= mouse[1]<= y/3+40: # no button
+            quit()# end program
+     loop2=True
+     loop3=True
+     while loop2==True:
+      sidekick=font.render ("You’re a Vampire slayer's sidekick",True,black)
+      screen.blit(sidekick,(150,300))
+      pygame.display.update()
+      time.sleep(4)
+      screen.fill(black)
+      pygame.display.flip()
+      playagain () # diplays replay sceen
+      pygame.display.update()
+      # draws buttons
+      pygame.draw.rect(screen,white,[460,200,140,40])  
+      screen.blit(yes, (460+50,200))
+      pygame.display.update()
+      pygame.draw.rect(screen,white,[200,200,140,40])
+      screen.blit(no, (200+50,200)) 
+      pygame.display.update()
+      while loop3==True:
+       for ev in pygame.event.get():
+        if ev.type == pygame.MOUSEBUTTONDOWN:
+         mouse = pygame.mouse.get_pos()
+         if 460<= mouse[0] <= 460+140 and y/3 <= mouse[1]<= y/3+40: # yes button
+            loop3=False
+            loop2=False
+            continue # exits well statements and goes back to top (again=False well loop)
+         if 200<= mouse[0] <= 200+140 and y/3 <= mouse[1]<= y/3+40: # no button
+            quit()# ends program
+   elif Turn<=15:
+     loop2=True
+     loop3=True
+     while loop2==True:
+      luck=font.render ("You got lucky, leave slaying to the professionals",True,black)
+      screen.blit(luck,(0,300))
+      pygame.display.update()
+      time.sleep(4)
+      screen.fill(black)
+      pygame.display.flip()
+      playagain () # displays replay screen
+      pygame.display.update()
+      # draws buttons
+      pygame.draw.rect(screen,white,[460,200,140,40])  
+      screen.blit(yes, (460+50,200))
+      pygame.display.update()
+      pygame.draw.rect(screen,white,[200,200,140,40])
+      screen.blit(no, (200+50,200)) 
+      pygame.display.update()
+      while loop3==True:
+       for ev in pygame.event.get():
+        if ev.type == pygame.MOUSEBUTTONDOWN:
+         mouse = pygame.mouse.get_pos()
+         if 460<= mouse[0] <= 460+140 and y/3 <= mouse[1]<= y/3+40: # yes button
+            loop3=False
+            loop2=False
+            continue # exits well statements to return to top of the game (again=false well statement)
+         if 200<= mouse[0] <= 200+140 and y/3 <= mouse[1]<= y/3+40:# no button
+            quit()# end program
+ else: # the computer wins
+  loop2=True
+  loop3=True
+  while loop2==True:
+   screen.fill(black)
+   pygame.display.flip()
+   died=font.render ("You Died",True,white)
+   screen.blit(died,(310,300))
+   pygame.display.update()
+   time.sleep(2)
+   screen.fill(black)
+   pygame.display.flip()
+   playagain () # displays replay screen
+   pygame.display.update()
+   # draws buttons
+   pygame.draw.rect(screen,white,[460,200,140,40])  
+   screen.blit(yes, (460+50,200))
+   pygame.display.update()
+   pygame.draw.rect(screen,white,[200,200,140,40])
+   screen.blit(no, (200+50,200)) 
+   pygame.display.update()
+   while loop3==True:
+    for ev in pygame.event.get():
+      if ev.type == pygame.MOUSEBUTTONDOWN:
+        mouse = pygame.mouse.get_pos()
+        if 460<= mouse[0] <= 460+140 and y/3 <= mouse[1]<= y/3+40: # yes button
+            loop3=False
+            loop2=False
+            continue# exits well statements to return to top of game (again=False well statement)
+        if 200<= mouse[0] <= 200+140 and y/3 <= mouse[1]<= y/3+40: #no button
+            quit()# ends program
